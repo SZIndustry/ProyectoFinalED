@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c7b80951-1331-4729-a8d7-1da2914c425e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/backend/src/main/java/com/final_proyect/app/controller/Example.java" beforeDir="false" afterPath="$PROJECT_DIR$/backend/src/main/java/com/final_proyect/app/controller/Example.java" afterDir="false" />
-    </list>
+    <list default="true" id="c7b80951-1331-4729-a8d7-1da2914c425e" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -29,7 +27,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "backend-dev",
-    "last_opened_file_path": "/home/ducker/Documentos/codes/EstructuraProyecctoFinal/backend",
+    "last_opened_file_path": "/home/ducker/Documentos/codes/EstructuraProyecctoFinal",
     "project.structure.last.edited": "Project",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0"
