@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'data/services/api_service.dart';
+import 'package:frontend/widgets/botones_Panel.dart';
+import 'services/api_service.dart';
 
 void main() {
   runApp(MyApp());
@@ -11,34 +12,14 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter + Spring Boot',
+      title: 'Proyecto Final ED',
       home: Scaffold(
-        appBar: AppBar(title: Text('Conexión a Backend')),
+        appBar: AppBar(title: Text('Proyecto Final ED')),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                child: Text("Probar GET"),
-                onPressed: () async {
-                  final msg = await api.fetchHello();
-                  print("Respuesta: $msg");
-                },
-              ),
-              ElevatedButton(
-                child: Text("Probar POST"),
-                onPressed: () async {
-                  final msg = await api.sendData({
-                    "nombre": "Flutter",
-                    "tipo": "Web"
-                  });
-                  print("Respuesta: $msg");
-                },
-              ),
-            ],
-          ),
+          child: BotonesPanel(), // Aquí usas el widget con tus botones
         ),
       ),
     );
   }
 }
+             
