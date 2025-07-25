@@ -8,7 +8,7 @@ import java.util.*;
 @RestController
 public class Example {
 
-    @GetMapping("/")
+    @GetMapping("/example1")
     public String hello() {
         return "Hola desde Spring Boot!";
     }
@@ -19,11 +19,3 @@ public class Example {
         return "Datos recibidos correctamente!";
     }
 }
-<<<<<<< HEAD
-=======
-
-//prueba
-// prueba de github
-//prueba 2 github
-//prueba 3 github
->>>>>>> 240e6bea71ab2f967f122476b7ee4edefbd5dd6b
