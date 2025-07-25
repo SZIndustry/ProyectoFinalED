@@ -1,5 +1,7 @@
 package com.final_proyect.app.models;
 
+import java.util.Objects;
+
 public class Nodo {
     private int x;
     private int y;
@@ -33,7 +35,26 @@ public class Nodo {
     public void setEsObstaculo(boolean esObstaculo) { this.esObstaculo = esObstaculo; }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Nodo)) return false;
+        Nodo nodo = (Nodo) o;
+        return x == nodo.x && y == nodo.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(x, y);
+    }
+
+    @Override
     public String toString() {
-        return "(" + x + "," + y + ")";
+        return "Nodo{" +
+                "x=" + x +
+                ", y=" + y +
+                ", inicio=" + esInicio +
+                ", fin=" + esFin +
+                ", obstaculo=" + esObstaculo +
+                '}';
     }
 }
