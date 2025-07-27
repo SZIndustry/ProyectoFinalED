@@ -18,11 +18,12 @@ public class MazeService {
         }
 
         switch (maze.getAlgoritmo().toLowerCase()) {
-            case "bfs":
-                return MazeSolver.resolverConBFS(maze);
-            // Aquí puedes añadir más casos para otros algoritmos (dfs, a_star, etc.)
-            default:
-                throw new IllegalArgumentException("Algoritmo no soportado: " + maze.getAlgoritmo());
+            case "bfs": return MazeSolver.resolverConBFS(maze);
+            case "dfs": return MazeSolver.resolverConDFS(maze);
+            case "recursivo2": return MazeSolver.resolverRecursivo2Direcciones(maze);
+            case "recursivo4": return MazeSolver.resolverRecursivo4Direcciones(maze);
+            case "recursivobacktracking": return MazeSolver.resolverRecursivo4ConBacktracking(maze);
+            default: throw new IllegalArgumentException("Algoritmo no soportado: " + maze.getAlgoritmo());
         }
     }
 }
