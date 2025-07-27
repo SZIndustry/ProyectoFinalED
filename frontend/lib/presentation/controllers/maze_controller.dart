@@ -1,106 +1,74 @@
-// lib/presentation/controllers/maze_controller.dart
-import 'package:frontend/logic/maze_generator.dart';
-
-import '../../data/services/maze_service.dart';
+import '../../data/models/nodo_model.dart';
 import '../../data/models/maze_result_model.dart';
+import '../../data/services/maze_service.dart';
+import '../../logic/maze_generator.dart';
 
 class MazeController {
   final MazeService _service = MazeService();
-  late List<List<int>> _maze;
+  List<List<Nodo>> maze = [];
   bool _isSolving = false;
-  MazeResult? _ultimoResultado;
+  MazeResult? _lastResult;
   String? _errorMessage;
-  
-  final List<String> algoritmosDisponibles = ['bfs', 'dfs', 'a*'];
-  String algoritmoSeleccionado = 'bfs';
 
-  List<List<int>> generar(int filas, int columnas) {
-    _maze = MazeGenerator.generarMaze(filas, columnas);
-    _ultimoResultado = null;
-    return _maze;
+  final List<String> availableAlgorithms = ['bfs'];
+
+  void generarLaberinto(int filas, int columnas) {
+    maze = generarMaze(filas, columnas);
+    maze[0][0].esInicio = true;
+    maze[filas - 1][columnas - 1].esFin = true;
   }
 
-  void toggleCell(int row, int col) {
-    if (_maze[row][col] == 2 || _maze[row][col] == 3) return;
-    _maze[row][col] = _maze[row][col] == 0 ? 1 : 0;
-    _ultimoResultado = null;
-  }
-
-  List<List<int>> get maze => _maze;
-  bool get isSolving => _isSolving;
-  String? get errorMessage => _errorMessage;
-  bool get hasError => _errorMessage != null;
-  List<String> get algoritmos => algoritmosDisponibles;
-  MazeResult? get ultimoResultado => _ultimoResultado;
-
-  void cambiarAlgoritmo(String nuevoAlgoritmo) {
-    if (algoritmosDisponibles.contains(nuevoAlgoritmo)) {
-      algoritmoSeleccionado = nuevoAlgoritmo;
+  void toggleObstaculo(int x, int y) {
+    final nodo = maze[x][y];
+    if (!nodo.esInicio && !nodo.esFin) {
+      nodo.esObstaculo = !nodo.esObstaculo;
     }
   }
 
-  Future<bool> verificarConexion() async {
-    try {
-      return await _service.verificarConexionBackend();
-    } catch (e) {
-      _errorMessage = "Error verificando conexión: ${e.toString()}";
-      return false;
-    }
-  }
-
-  Future<MazeResult?> resolver({
-    required List<List<int>> maze,
-    required int filas,
-    required int columnas,
-  }) async {
+  Future<void> resolver(String algoritmo) async {
+    if (_isSolving) return;
     _isSolving = true;
-    _errorMessage = null;
-    
+
     try {
-      final conectado = await verificarConexion();
-      if (!conectado) {
-        throw Exception("No se pudo conectar al backend");
-      }
-
-      final resultado = await _service.enviarLaberinto(
-        maze: maze,
-        filas: filas,
-        columnas: columnas,
-        algoritmo: algoritmoSeleccionado,
-      );
-      
-      _ultimoResultado = resultado;
-      _isSolving = false;
-      return resultado;
-    } catch (e) {
-      _isSolving = false;
-      _errorMessage = e.toString();
-      rethrow;
-    }
-  }
-
-  void aplicarSolucion() {
-    if (_ultimoResultado == null) return;
-
-    // Primero resetear a estado inicial (excepto obstáculos, inicio y fin)
-    for (int i = 0; i < _maze.length; i++) {
-      for (int j = 0; j < _maze[i].length; j++) {
-        if (_maze[i][j] != 1 && _maze[i][j] != 2 && _maze[i][j] != 3) {
-          _maze[i][j] = 0; // Blanco (libre)
+      for (var fila in maze) {
+        for (var nodo in fila) {
+          nodo.resetTipo();
         }
       }
+
+      final result = await _service.resolverMaze(
+        maze: maze,
+        algoritmo: algoritmo,
+      );
+
+      if (result != null) {
+        _lastResult = result;
+        aplicarResultado(result);
+      }
+    } catch (e, stack) {
+      _errorMessage = e.toString();
+      print("❌ Error en MazeController.resolver(): $_errorMessage");
+      print(stack);
     }
 
-    // Aplicar la solución recibida del backend
-    for (final nodo in _ultimoResultado!.resultado) {
-      final x = nodo['x'] as int;
-      final y = nodo['y'] as int;
-      final tipo = nodo['tipo'] as String;
+    _isSolving = false;
+  }
 
-      // Solo modificar si no es obstáculo, inicio o fin
-      if (_maze[x][y] != 1 && _maze[x][y] != 2 && _maze[x][y] != 3) {
-        _maze[x][y] = tipo == 'camino' ? 4 : 5;
+  void aplicarResultado(MazeResult result) {
+    try {
+      for (var paso in result.resultado) {
+        int x = paso['x'];
+        int y = paso['y'];
+        String tipo = paso['tipo'];
+        if (x >= 0 && y >= 0 && x < maze.length && y < maze[0].length) {
+          final nodo = maze[x][y];
+          if (!nodo.esInicio && !nodo.esFin && !nodo.esObstaculo) {
+            nodo.tipo = tipo;
+          }
+        }
       }
+    } catch (e) {
+      print("⚠️ Error aplicando resultado: $e");
     }
   }
 }

@@ -1,9 +1,6 @@
-// lib/presentation/pages/maze_page.dart
 import 'package:flutter/material.dart';
-import 'package:frontend/data/models/maze_result_model.dart';
-import '../controllers/maze_controller.dart';
+import 'package:frontend/presentation/controllers/maze_controller.dart';
 import '../widgets/maze_grid.dart';
-import '../widgets/connection_status.dart';
 
 class MazePage extends StatefulWidget {
   const MazePage({super.key});
@@ -13,202 +10,137 @@ class MazePage extends StatefulWidget {
 }
 
 class _MazePageState extends State<MazePage> {
-  final filasController = TextEditingController(text: '10');
-  final columnasController = TextEditingController(text: '10');
   final MazeController _controller = MazeController();
-
-  List<List<int>> maze = [];
-  bool _showSolution = false;
-  bool _checkingConnection = false;
+  final TextEditingController _rowsController = TextEditingController();
+  final TextEditingController _colsController = TextEditingController();
+  String selectedAlgorithm = 'bfs';
 
   @override
-  void initState() {
-    super.initState();
-    _generarMazeInicial();
-    _verificarConexionInicial();
+  void dispose() {
+    _rowsController.dispose();
+    _colsController.dispose();
+    super.dispose();
   }
 
-  void _generarMazeInicial() {
-    final filas = int.tryParse(filasController.text) ?? 10;
-    final columnas = int.tryParse(columnasController.text) ?? 10;
-    setState(() {
-      maze = _controller.generar(filas, columnas);
-    });
-  }
+  void _generarMaze() {
+    final filas = int.tryParse(_rowsController.text);
+    final columnas = int.tryParse(_colsController.text);
 
-  Future<void> _verificarConexionInicial() async {
-    setState(() => _checkingConnection = true);
-    await _controller.verificarConexion();
-    setState(() => _checkingConnection = false);
-  }
-
-  void generarMaze() {
-    final filas = int.tryParse(filasController.text) ?? 10;
-    final columnas = int.tryParse(columnasController.text) ?? 10;
-    setState(() {
-      maze = _controller.generar(filas, columnas);
-      _showSolution = false;
-    });
-  }
-
-  void resolver() async {
-    if (_controller.isSolving) return;
-
-    setState(() {
-      _showSolution = false;
-    });
-
-    try {
-      final resultado = await _controller.resolver(
-        maze: maze,
-        filas: maze.length,
-        columnas: maze[0].length,
-      );
-
-      setState(() {
-        _controller.aplicarSolucion();
-        _showSolution = true;
-      });
-
-      _mostrarDetallesResultado(resultado!);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: ${_controller.errorMessage}"),
-          backgroundColor: Colors.red,
-        ),
-      );
+    if (filas == null || columnas == null || filas <= 0 || columnas <= 0) {
+      print("❌ Tamaño inválido para el laberinto");
+      return;
     }
+
+    setState(() {
+      _controller.generarLaberinto(filas, columnas);
+    });
   }
 
-  void _mostrarDetallesResultado(MazeResult resultado) {
+  Future<void> _resolverMaze() async {
+    if (_controller.maze.isEmpty) {
+      print("❌ El laberinto no ha sido generado");
+      return;
+    }
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Resultado del Algoritmo"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
+      barrierDismissible: false,
+      builder: (_) => const AlertDialog(
+        content: Row(
           children: [
-            Text("Algoritmo: ${resultado.algoritmo.toUpperCase()}"),
-            const SizedBox(height: 8),
-            Text("Tiempo: ${resultado.tiempoEjecucion} ms"),
-            const SizedBox(height: 8),
-            Text("Nodos visitados: ${resultado.resultado.where((n) => n['tipo'] == 'visitado').length}"),
-            const SizedBox(height: 8),
-            Text("Longitud camino: ${resultado.resultado.where((n) => n['tipo'] == 'camino').length}"),
+            CircularProgressIndicator(),
+            SizedBox(width: 16),
+            Text("Resolviendo laberinto..."),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("Cerrar"),
-          ),
-        ],
       ),
     );
+
+    try {
+      print("📤 Enviando laberinto al backend...");
+      await _controller.resolver(selectedAlgorithm);
+      print("📥 Datos recibidos del backend y aplicados.");
+    } catch (e, stack) {
+      print("❌ Error en _resolverMaze: $e");
+      print(stack);
+    } finally {
+      if (mounted) {
+        Navigator.pop(context); // cerrar loading
+        setState(() {});
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Laberinto")),
-      body: SingleChildScrollView(
+      appBar: AppBar(title: const Text('Laberinto')),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           children: [
-            ConnectionStatus(
-              checking: _checkingConnection,
-              controller: _controller,
-              onRetry: _verificarConexionInicial,
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: filasController,
-                      decoration: const InputDecoration(labelText: "Filas"),
-                      keyboardType: TextInputType.number,
-                    ),
+            Row(
+              children: [
+                Flexible(
+                  child: TextField(
+                    controller: _rowsController,
+                    decoration: const InputDecoration(labelText: 'Filas'),
+                    keyboardType: TextInputType.number,
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: TextField(
-                      controller: columnasController,
-                      decoration: const InputDecoration(labelText: "Columnas"),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: DropdownButtonFormField<String>(
-                value: _controller.algoritmoSeleccionado,
-                decoration: const InputDecoration(
-                  labelText: 'Algoritmo',
-                  border: OutlineInputBorder(),
                 ),
-                items: _controller.algoritmos.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value.toUpperCase()),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    _controller.cambiarAlgoritmo(newValue!);
-                  });
-                },
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton(
-                    onPressed: generarMaze,
-                    child: const Text("Generar"),
+                const SizedBox(width: 10),
+                Flexible(
+                  child: TextField(
+                    controller: _colsController,
+                    decoration: const InputDecoration(labelText: 'Columnas'),
+                    keyboardType: TextInputType.number,
                   ),
-                  ElevatedButton(
-                    onPressed: _controller.isSolving ? null : resolver,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _showSolution ? Colors.green : null,
+                ),
+                const SizedBox(width: 10),
+                DropdownButton<String>(
+                  value: selectedAlgorithm,
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        selectedAlgorithm = value;
+                      });
+                    }
+                  },
+                  items: _controller.availableAlgorithms
+                      .map((alg) => DropdownMenuItem(
+                            value: alg,
+                            child: Text(alg.toUpperCase()),
+                          ))
+                      .toList(),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: _generarMaze,
+                  child: const Text('Generar laberinto'),
+                ),
+                const SizedBox(width: 10),
+                ElevatedButton(
+                  onPressed: _resolverMaze,
+                  child: const Text('Resolver laberinto'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Expanded(
+              child: _controller.maze.isEmpty
+                  ? const Center(child: Text('Genera un laberinto para comenzar'))
+                  : MazeGrid(
+                      maze: _controller.maze,
+                      onTapNodo: (x, y) {
+                        setState(() {
+                          _controller.toggleObstaculo(x, y);
+                        });
+                      },
                     ),
-                    child: _controller.isSolving
-                        ? const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              CircularProgressIndicator(color: Colors.white),
-                              SizedBox(width: 8),
-                              Text("Resolviendo"),
-                            ],
-                          )
-                        : Text(_showSolution ? "Resuelto" : "Resolver"),
-                  ),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: MazeGrid(
-                maze: maze,
-                onCellTap: (row, col) {
-                  setState(() {
-                    _controller.toggleCell(row, col);
-                    maze = _controller.maze;
-                    _showSolution = false;
-                  });
-                },
-                isSolving: _controller.isSolving,
-              ),
             ),
           ],
         ),

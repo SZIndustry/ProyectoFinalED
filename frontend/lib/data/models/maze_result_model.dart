@@ -1,4 +1,3 @@
-// lib/data/models/maze_result_model.dart
 class MazeResult {
   final List<Map<String, dynamic>> resultado;
   final int tiempoEjecucion;
@@ -16,18 +15,5 @@ class MazeResult {
       tiempoEjecucion: json['tiempoEjecucion'],
       algoritmo: json['algoritmo'],
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'resultado': resultado,
-      'tiempoEjecucion': tiempoEjecucion,
-      'algoritmo': algoritmo,
-    };
-  }
-
-  @override
-  String toString() {
-    return 'MazeResult{resultado: $resultado, tiempoEjecucion: $tiempoEjecucion ms, algoritmo: $algoritmo}';
   }
 }
