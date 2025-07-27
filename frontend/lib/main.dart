@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/presentation/pages/mensaje_page.dart';
-//import 'package:frontend/widgets/botones_Panel.dart';
-import 'services/api_service.dart';
+import 'presentation/pages/home_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const ProyectoFinalApp());
 }
 
-class MyApp extends StatelessWidget {
-  final ApiService api = ApiService();
+class ProyectoFinalApp extends StatelessWidget {
+  const ProyectoFinalApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Proyecto Final ED',
-      home: MensajePage(),
+      title: 'Proyecto Final',
+      theme: ThemeData(primarySwatch: Colors.indigo),
+      home: const HomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
-             
