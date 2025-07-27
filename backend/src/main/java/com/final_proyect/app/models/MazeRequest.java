@@ -1,16 +1,18 @@
 package com.final_proyect.app.models;
 
 import java.util.List;
+import java.util.Map;
 
-public class Maze {
+public class MazeRequest {
     private int filas;
     private int columnas;
     private String algoritmo;
-    private List<Nodo> nodos;
+    private List<Map<String, Object>> nodos;
 
-    public Maze() {}
+    public MazeRequest() {
+    }
 
-    public Maze(int filas, int columnas, String algoritmo, List<Nodo> nodos) {
+    public MazeRequest(int filas, int columnas, String algoritmo, List<Map<String, Object>> nodos) {
         this.filas = filas;
         this.columnas = columnas;
         this.algoritmo = algoritmo;
@@ -41,11 +43,11 @@ public class Maze {
         this.algoritmo = algoritmo;
     }
 
-    public List<Nodo> getNodos() {
+    public List<Map<String, Object>> getNodos() {
         return nodos;
     }
 
-    public void setNodos(List<Nodo> nodos) {
+    public void setNodos(List<Map<String, Object>> nodos) {
         this.nodos = nodos;
     }
 }

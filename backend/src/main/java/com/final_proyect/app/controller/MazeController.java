@@ -1,26 +1,77 @@
 package com.final_proyect.app.controller;
 
 import com.final_proyect.app.models.Maze;
+import com.final_proyect.app.models.MazeRequest;
 import com.final_proyect.app.models.MazeResult;
+import com.final_proyect.app.models.Nodo;
 import com.final_proyect.app.service.MazeService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@CrossOrigin(origins = "*")  // Permitir solicitudes del frontend (Flutter Web)
+import java.util.*;
+
 @RestController
-@RequestMapping("/maze")     // Ruta base: /maze
+@RequestMapping("/api")
 public class MazeController {
 
-    @Autowired
-    private MazeService mazeService;
+    private final MazeService mazeService;
 
-    @PostMapping("/resolver")
-    public MazeResult resolverLaberinto(@RequestBody Maze maze) {
-        return mazeService.firstMethod(maze);
+    public MazeController(MazeService mazeService) {
+        this.mazeService = mazeService;
     }
 
-    @GetMapping("/")
-    public String prueba() {
-        return "Controlador de laberintos funcionando correctamente.";
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Backend conectado");
+    }
+
+    @PostMapping("/resolver")
+    public ResponseEntity<MazeResult> resolverLaberinto(@RequestBody MazeRequest request) {
+
+        System.out.println("✅ Petición recibida en /resolver:");
+        System.out.println("Filas: " + request.getFilas());
+        System.out.println("Columnas: " + request.getColumnas());
+        System.out.println("Algoritmo: " + request.getAlgoritmo());
+        System.out.println("Nodos recibidos: ");
+        for (Map<String, Object> nodoMap : request.getNodos()) {
+            System.out.println(nodoMap);
+        }
+
+        long startTime = System.currentTimeMillis();
+
+        List<Nodo> nodos = new ArrayList<>();
+
+        for (Map<String, Object> nodoMap : request.getNodos()) {
+            int x = ((Number) nodoMap.get("x")).intValue();
+            int y = ((Number) nodoMap.get("y")).intValue();
+
+            boolean esInicio = Boolean.TRUE.equals(nodoMap.get("esInicio"));
+            boolean esFin = Boolean.TRUE.equals(nodoMap.get("esFin"));
+            boolean esObstaculo = Boolean.TRUE.equals(nodoMap.get("esObstaculo"));
+
+            nodos.add(new Nodo(x, y, esInicio, esFin, esObstaculo));
+        }
+
+        Maze maze = new Maze(
+                request.getFilas(),
+                request.getColumnas(),
+                request.getAlgoritmo(),
+                nodos
+        );
+
+        MazeResult result = mazeService.resolver(maze);
+
+        long tiempoEjecucion = System.currentTimeMillis() - startTime;
+
+        System.out.println("\n🚀 ENVIANDO RESPUESTA AL FRONTEND:");
+        System.out.println("• Algoritmo: " + result.getAlgoritmo());
+        System.out.println("• Tiempo ejecución: " + tiempoEjecucion + "ms");
+        System.out.println("• Nodos solución: " + result.getResultado().size());
+
+        return ResponseEntity.ok(new MazeResult(
+                result.getResultado(),
+                tiempoEjecucion,
+                result.getAlgoritmo()
+        ));
     }
 }

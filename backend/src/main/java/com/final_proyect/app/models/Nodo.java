@@ -19,20 +19,45 @@ public class Nodo {
         this.esObstaculo = esObstaculo;
     }
 
-    public int getX() { return x; }
-    public void setX(int x) { this.x = x; }
+    public int getX() {
+        return x;
+    }
 
-    public int getY() { return y; }
-    public void setY(int y) { this.y = y; }
+    public void setX(int x) {
+        this.x = x;
+    }
 
-    public boolean isEsInicio() { return esInicio; }
-    public void setEsInicio(boolean esInicio) { this.esInicio = esInicio; }
+    public int getY() {
+        return y;
+    }
 
-    public boolean isEsFin() { return esFin; }
-    public void setEsFin(boolean esFin) { this.esFin = esFin; }
+    public void setY(int y) {
+        this.y = y;
+    }
 
-    public boolean isEsObstaculo() { return esObstaculo; }
-    public void setEsObstaculo(boolean esObstaculo) { this.esObstaculo = esObstaculo; }
+    public boolean isEsInicio() {
+        return esInicio;
+    }
+
+    public void setEsInicio(boolean esInicio) {
+        this.esInicio = esInicio;
+    }
+
+    public boolean isEsFin() {
+        return esFin;
+    }
+
+    public void setEsFin(boolean esFin) {
+        this.esFin = esFin;
+    }
+
+    public boolean isEsObstaculo() {
+        return esObstaculo;
+    }
+
+    public void setEsObstaculo(boolean esObstaculo) {
+        this.esObstaculo = esObstaculo;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -45,16 +70,5 @@ public class Nodo {
     @Override
     public int hashCode() {
         return Objects.hash(x, y);
-    }
-
-    @Override
-    public String toString() {
-        return "Nodo{" +
-                "x=" + x +
-                ", y=" + y +
-                ", inicio=" + esInicio +
-                ", fin=" + esFin +
-                ", obstaculo=" + esObstaculo +
-                '}';
     }
 }
