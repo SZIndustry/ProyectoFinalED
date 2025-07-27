@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/widgets/botones_Panel.dart';
+import 'package:frontend/presentation/pages/mensaje_page.dart';
+//import 'package:frontend/widgets/botones_Panel.dart';
 import 'services/api_service.dart';
 
 void main() {
@@ -13,12 +14,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Proyecto Final ED',
-      home: Scaffold(
-        appBar: AppBar(title: Text('Proyecto Final ED')),
-        body: Center(
-          child: BotonesPanel(), // Aquí usas el widget con tus botones
-        ),
-      ),
+      home: MensajePage(),
     );
   }
 }
