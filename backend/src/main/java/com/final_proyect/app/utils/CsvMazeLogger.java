@@ -9,12 +9,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 public class CsvMazeLogger {
 
-    private static final String CSV_PATH = "logs/laberintos_recibidos.csv";
+    // Eliminamos CSV_PATH fijo
+
     private static final String[] HEADERS = {
             "fecha", "algoritmo", "filas", "columnas", "tipoDato", "x", "y", "esInicio", "esFin", "esObstaculo", "tiempoEjecucion(ms)"
     };
@@ -31,14 +33,15 @@ public class CsvMazeLogger {
             System.out.println("[CSV] Carpeta 'logs' ya existe.");
         }
 
-        boolean escribirEncabezado = !new File(CSV_PATH).exists();
-        System.out.println("[CSV] Archivo CSV existe? " + !escribirEncabezado);
+        // Generar nombre de archivo único por cada llamada
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss_SSS"));
+        String nombreArchivo = String.format("logs/laberinto_%s.csv", timestamp);
 
-        try (PrintWriter writer = new PrintWriter(new FileWriter(CSV_PATH, true))) {
-            if (escribirEncabezado) {
-                System.out.println("[CSV] Escribiendo encabezado...");
-                writer.println(String.join(",", HEADERS));
-            }
+        System.out.println("[CSV] Archivo CSV: " + nombreArchivo);
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(nombreArchivo, false))) {
+            // Siempre escribimos encabezado porque es archivo nuevo
+            writer.println(String.join(",", HEADERS));
 
             LocalDateTime ahora = LocalDateTime.now();
 
