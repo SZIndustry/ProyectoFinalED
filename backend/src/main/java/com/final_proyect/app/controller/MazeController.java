@@ -5,9 +5,9 @@ import com.final_proyect.app.models.MazeRequest;
 import com.final_proyect.app.models.MazeResult;
 import com.final_proyect.app.models.Nodo;
 import com.final_proyect.app.service.MazeService;
+import com.final_proyect.app.util.CsvMazeLogger;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.*;
 
 @RestController
@@ -27,7 +27,6 @@ public class MazeController {
 
     @PostMapping("/resolver")
     public ResponseEntity<MazeResult> resolverLaberinto(@RequestBody MazeRequest request) {
-
         System.out.println("✅ Petición recibida en /resolver:");
         System.out.println("Filas: " + request.getFilas());
         System.out.println("Columnas: " + request.getColumnas());
@@ -40,7 +39,6 @@ public class MazeController {
         long startTime = System.currentTimeMillis();
 
         List<Nodo> nodos = new ArrayList<>();
-
         for (Map<String, Object> nodoMap : request.getNodos()) {
             int x = ((Number) nodoMap.get("x")).intValue();
             int y = ((Number) nodoMap.get("y")).intValue();
@@ -62,6 +60,9 @@ public class MazeController {
         MazeResult result = mazeService.resolver(maze);
 
         long tiempoEjecucion = System.currentTimeMillis() - startTime;
+
+        // ✅ Guardar todo en CSV: laberinto + resultado + tiempo ejecución
+        CsvMazeLogger.guardarLaberintoConResultado(maze, result, tiempoEjecucion);
 
         System.out.println("\n🚀 ENVIANDO RESPUESTA AL FRONTEND:");
         System.out.println("• Algoritmo: " + result.getAlgoritmo());
