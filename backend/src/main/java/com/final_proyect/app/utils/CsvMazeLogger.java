@@ -20,22 +20,30 @@ public class CsvMazeLogger {
     };
 
     public static void guardarLaberintoConResultado(Maze maze, MazeResult resultado, long tiempoEjecucion) {
+        System.out.println("[CSV] Iniciando guardado de laberinto y resultados...");
 
         File directorio = new File("logs");
         if (!directorio.exists()) {
-            directorio.mkdirs(); // crea la carpeta logs si no existe
+            System.out.println("[CSV] Carpeta 'logs' no existe, creando...");
+            boolean created = directorio.mkdirs();
+            System.out.println("[CSV] Carpeta creada: " + created);
+        } else {
+            System.out.println("[CSV] Carpeta 'logs' ya existe.");
         }
 
         boolean escribirEncabezado = !new File(CSV_PATH).exists();
+        System.out.println("[CSV] Archivo CSV existe? " + !escribirEncabezado);
 
         try (PrintWriter writer = new PrintWriter(new FileWriter(CSV_PATH, true))) {
             if (escribirEncabezado) {
+                System.out.println("[CSV] Escribiendo encabezado...");
                 writer.println(String.join(",", HEADERS));
             }
 
             LocalDateTime ahora = LocalDateTime.now();
 
             // Guardar nodos originales
+            System.out.println("[CSV] Guardando nodos originales: " + maze.getNodos().size());
             for (Nodo nodo : maze.getNodos()) {
                 writer.printf("%s,%s,%d,%d,%s,%d,%d,%b,%b,%b,%s%n",
                         ahora,
@@ -52,8 +60,9 @@ public class CsvMazeLogger {
                 );
             }
 
-            // Guardar nodos visitados y camino según MazeResult (resultado.getResultado())
+            // Guardar nodos visitados y camino
             List<Map<String, Object>> listaResultados = resultado.getResultado();
+            System.out.println("[CSV] Guardando resultados (visitados + camino): " + listaResultados.size());
             for (Map<String, Object> entry : listaResultados) {
                 String tipo = (String) entry.get("tipo"); // "visitado" o "camino"
                 int x = (int) entry.get("x");
@@ -67,11 +76,12 @@ public class CsvMazeLogger {
                         tipo,
                         x,
                         y,
-                        "" // tiempo vacío aquí
+                        ""
                 );
             }
 
-            // Guardar tiempo de ejecución en una fila aparte
+            // Guardar tiempo ejecución
+            System.out.println("[CSV] Guardando tiempo de ejecución: " + tiempoEjecucion + "ms");
             writer.printf("%s,%s,%d,%d,%s,,,,,,, %d%n",
                     ahora,
                     maze.getAlgoritmo(),
@@ -81,8 +91,11 @@ public class CsvMazeLogger {
                     tiempoEjecucion
             );
 
+            System.out.println("[CSV] Guardado completado correctamente.");
+
         } catch (IOException e) {
             System.err.println("❌ Error al guardar laberinto CSV: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
