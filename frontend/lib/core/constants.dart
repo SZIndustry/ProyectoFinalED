@@ -1,1 +1,1 @@
-const String BASE_URL = "http://172.27.246.0:8081/api"; // Cámbialo si usas IP real
+const String BASE_URL = "http://localhost:8081/api"; // Cámbialo si usas IP real

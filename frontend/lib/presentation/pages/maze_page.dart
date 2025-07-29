@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend/presentation/controllers/maze_controller.dart';
+import '../controllers/maze_controller.dart';
 import '../widgets/maze_grid.dart';
 
 class MazePage extends StatefulWidget {
@@ -10,13 +10,23 @@ class MazePage extends StatefulWidget {
 }
 
 class _MazePageState extends State<MazePage> {
+  
   final MazeController _controller = MazeController();
   final TextEditingController _rowsController = TextEditingController();
   final TextEditingController _colsController = TextEditingController();
   String selectedAlgorithm = 'bfs';
 
   @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
   void dispose() {
+    _controller.removeListener(() {});
     _rowsController.dispose();
     _colsController.dispose();
     super.dispose();
@@ -31,9 +41,7 @@ class _MazePageState extends State<MazePage> {
       return;
     }
 
-    setState(() {
-      _controller.generarLaberinto(filas, columnas);
-    });
+    _controller.generarLaberinto(filas, columnas);
   }
 
   Future<void> _resolverMaze() async {
@@ -66,37 +74,53 @@ class _MazePageState extends State<MazePage> {
     } finally {
       if (mounted) {
         Navigator.pop(context); // cerrar loading
-        setState(() {});
       }
     }
   }
 
-  @override
+String interactionMode = 'obstaculo'; // o 'iniciofin'
+
+@override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Laberinto')),
+      appBar: AppBar(
+        title: const Text('Laberinto'),
+        backgroundColor: Colors.deepPurple,
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              alignment: WrapAlignment.start,
               children: [
-                Flexible(
+                SizedBox(
+                  width: 100,
                   child: TextField(
                     controller: _rowsController,
-                    decoration: const InputDecoration(labelText: 'Filas'),
+                    decoration: InputDecoration(
+                      labelText: 'Filas',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
                     keyboardType: TextInputType.number,
                   ),
                 ),
-                const SizedBox(width: 10),
-                Flexible(
+                SizedBox(
+                  width: 100,
                   child: TextField(
                     controller: _colsController,
-                    decoration: const InputDecoration(labelText: 'Columnas'),
+                    decoration: InputDecoration(
+                      labelText: 'Columnas',
+                      border: OutlineInputBorder(),
+                      isDense: true,
+                    ),
                     keyboardType: TextInputType.number,
                   ),
                 ),
-                const SizedBox(width: 10),
                 DropdownButton<String>(
                   value: selectedAlgorithm,
                   onChanged: (value) {
@@ -113,34 +137,84 @@ class _MazePageState extends State<MazePage> {
                           ))
                       .toList(),
                 ),
+                DropdownButton<String>(
+                  value: interactionMode,
+                  items: const [
+                    DropdownMenuItem(value: 'obstaculo', child: Text("Obstáculo")),
+                    DropdownMenuItem(value: 'iniciofin', child: Text("Inicio/Fin")),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        interactionMode = value;
+                      });
+                    }
+                  },
+                ),
               ],
             ),
-            const SizedBox(height: 10),
-            Row(
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
               children: [
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: _generarMaze,
-                  child: const Text('Generar laberinto'),
+                  icon: const Icon(Icons.grid_on),
+                  label: const Text('Generar'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  ),
                 ),
-                const SizedBox(width: 10),
-                ElevatedButton(
+                ElevatedButton.icon(
                   onPressed: _resolverMaze,
-                  child: const Text('Resolver laberinto'),
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Resolver'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            Expanded(
-              child: _controller.maze.isEmpty
-                  ? const Center(child: Text('Genera un laberinto para comenzar'))
-                  : MazeGrid(
-                      maze: _controller.maze,
-                      onTapNodo: (x, y) {
-                        setState(() {
-                          _controller.toggleObstaculo(x, y);
-                        });
-                      },
+            const SizedBox(height: 16),
+           Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  if (_controller.maze.isEmpty) {
+                    return const Center(child: Text('Genera un laberinto para comenzar'));
+                  }
+
+                  final rows = _controller.maze.length;
+                  final cols = _controller.maze[0].length;
+
+                  // Calcula el tamaño de cada celda basado en el espacio disponible
+                  final cellWidth = constraints.maxWidth / cols;
+                  final cellHeight = constraints.maxHeight / rows;
+                  final cellSize = cellWidth < cellHeight ? cellWidth : cellHeight;
+
+                  final gridWidth = cellSize * cols;
+                  final gridHeight = cellSize * rows;
+
+                  return Center(
+                    child: SizedBox(
+                      width: gridWidth,
+                      height: gridHeight,
+                      child: MazeGrid(
+                        maze: _controller.maze,
+                        onTapNodo: (x, y) {
+                          if (interactionMode == 'obstaculo') {
+                            _controller.toggleObstaculo(x, y);
+                          } else if (interactionMode == 'iniciofin') {
+                            _controller.seleccionarInicioFin(x, y);
+                          }
+                        },
+                      ),
                     ),
+                  );
+                },
+              ),
             ),
           ],
         ),
