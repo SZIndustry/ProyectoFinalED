@@ -43,13 +43,14 @@ class MazeGrid extends StatelessWidget {
           Nodo nodo = maze[x][y];
 
           return GestureDetector(
-            onTap: () {
-              onTapNodo(x, y);
-            },
-            child: Container(
-              margin: const EdgeInsets.all(1),
+            onTap: () => onTapNodo(x, y),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              margin: const EdgeInsets.all(2),
               decoration: BoxDecoration(
                 color: _getColor(nodo),
+                shape: BoxShape.circle,
                 border: Border.all(color: Colors.black12),
               ),
             ),

@@ -11,9 +11,12 @@ class MazeResult {
 
   factory MazeResult.fromJson(Map<String, dynamic> json) {
     return MazeResult(
-      resultado: List<Map<String, dynamic>>.from(json['resultado']),
+      resultado: (json['resultado'] as List)
+          .map((e) => Map<String, dynamic>.from(e))
+          .toList(),
       tiempoEjecucion: json['tiempoEjecucion'],
       algoritmo: json['algoritmo'],
     );
   }
+  
 }

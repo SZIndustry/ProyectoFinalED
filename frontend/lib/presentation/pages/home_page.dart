@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/presentation/pages/csv_page.dart';
 import '../pages/maze_page.dart';
-import '../pages/data_page.dart';
-import '../pages/benchmark_page.dart';
+import 'benchmark_page.dart';
 import '../widgets/home_button.dart';
 
 class HomePage extends StatelessWidget {
@@ -28,19 +28,19 @@ class HomePage extends StatelessWidget {
               ),
             ),
             HomeButton(
+              label: 'Benchmark',
+              icon: Icons.bar_chart,
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const BenchmarkPage()),
+              ),
+            ),
+            HomeButton(
               label: 'Datos',
               icon: Icons.bar_chart,
               onPressed: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const DataPage()),
-              ),
-            ),
-            HomeButton(
-              label: 'Benchmarking',
-              icon: Icons.timeline,
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const BenchmarkPage()),
+                MaterialPageRoute(builder: (_) => const CsvPage()),
               ),
             ),
           ],
