@@ -16,7 +16,7 @@ class BenchmarkController extends ChangeNotifier {
       resultados = await _service.ejecutarBenchmark(maze);
     } catch (e) {
       errorMessage = e.toString();
-      print("❌ Benchmark error: $errorMessage");
+      print(" Benchmark error: $errorMessage");
     }
     isLoading = false;
     notifyListeners();

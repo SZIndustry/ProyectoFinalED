@@ -12,13 +12,14 @@ class MazeGrid extends StatelessWidget {
   }) : super(key: key);
 
   Color _getColor(Nodo nodo) {
-    if (nodo.esInicio) return Colors.green;
-    if (nodo.esFin) return Colors.red;
-    if (nodo.esObstaculo) return Colors.black;
-    if (nodo.tipo == 'camino') return Colors.yellow;
-    if (nodo.tipo == 'visitado') return Colors.grey;
-    return Colors.white;
-  }
+  if (nodo.esInicio) return Colors.green;
+  if (nodo.esFin) return Colors.red;
+  if (nodo.esObstaculo) return Colors.black;
+  if (nodo.tipo == 'camino') return Colors.yellow;   
+  if (nodo.tipo == 'visitado') return Colors.grey;     
+  return Colors.white;
+}
+
 
   @override
   Widget build(BuildContext context) {

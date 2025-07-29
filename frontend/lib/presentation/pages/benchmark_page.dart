@@ -25,14 +25,14 @@ class _BenchmarkPageState extends State<BenchmarkPage> {
     final columnas = int.tryParse(_colsController.text);
 
     if (filas == null || columnas == null || filas <= 0 || columnas <= 0) {
-      print("❌ Tamaño inválido para el laberinto");
+      print("Tamaño inválido para el laberinto");
       return;
     }
 
     try {
       mazeCtrl.generarLaberinto(filas, columnas);
     } catch (e, stack) {
-      print("❌ Error al generar laberinto: $e");
+      print("Error al generar laberinto: $e");
       print(stack);
     }
   }
@@ -40,11 +40,11 @@ class _BenchmarkPageState extends State<BenchmarkPage> {
   Future<void> _ejecutarBenchmark(
       BenchmarkController benchCtrl, List<List<Nodo>> maze) async {
     try {
-      print("📤 Ejecutando benchmark...");
+      print("Ejecutando benchmark...");
       await benchCtrl.ejecutarBenchmark(maze);
-      print("📥 Resultados recibidos del backend");
+      print("Resultados recibidos del backend");
     } catch (e, stack) {
-      print("❌ Error al ejecutar benchmark: $e");
+      print("Error al ejecutar benchmark: $e");
       print(stack);
     } finally {
       if (mounted) setState(() {});
