@@ -5,18 +5,18 @@
 **Materia:** Estructura de Datos - Segundo Interciclo  
 **Docente:** Ing. Pablo Torres  
 **Autores:**  
-- [Nombre Estudiante 1] - [correo1@est.ups.edu.ec]  
-- [Nombre Estudiante 2] - [correo2@est.ups.edu.ec]  
+- [Cristopher Salinas] - [csalinasz@est.ups.edu.ec]  
+- [Juan Jimenez] - [jjimenezc16@est.ups.edu.ec]  
 
 ---
 
-## 🎯 Objetivo General
+##  Objetivo General
 
 Desarrollar una aplicación que implemente distintos algoritmos de búsqueda para encontrar la **ruta óptima** en un laberinto desde un punto de inicio (A) hasta un punto final (B), aplicando **programación dinámica** y **estructuras de datos** eficientes.
 
 ---
 
-## 📘 Descripción del Problema
+##  Descripción del Problema
 
 El sistema implementa un solucionador de laberintos que permite:
 
@@ -34,7 +34,7 @@ El laberinto se modela como una matriz donde cada celda puede ser:
 
 ---
 
-## 🧠 Marco Teórico
+## Marco Teórico
 
 ### Algoritmos Implementados
 
@@ -73,18 +73,18 @@ El laberinto se modela como una matriz donde cada celda puede ser:
 
 ---
 
-## 🧰 Tecnologías Utilizadas
+##  Tecnologías Utilizadas
 
 ### Backend (Java - Spring Boot)
-- **Lenguaje:** Java 11
-- **Framework:** Spring Boot 2.7
+- **Lenguaje:** Java 21
+- **Framework:** Spring Boot 3.5.4
 - **Endpoints REST:**
   - `/resolver`: Resuelve laberinto con algoritmo específico
   - `/benchmark`: Ejecuta comparativa de algoritmos
   - `/logs`: Gestión de archivos históricos
 
 ### Frontend (Flutter)
-- **Framework:** Flutter 3.0
+- **Framework:** Flutter 3.32.7
 - **Gestión de estado:** Provider
 - **Visualización:** Custom painters y gráficos interactivos
 
@@ -94,7 +94,7 @@ El laberinto se modela como una matriz donde cada celda puede ser:
 
 ---
 
-## 🧩 Estructura del Proyecto
+##  Estructura del Proyecto
 
 ### Diagrama UML Backend
 
@@ -330,3 +330,101 @@ classDiagram
     HomePage --> HomeButton
     BenchmarkCard --> MazeBenchmarkResult
     BenchmarkChart --> MazeBenchmarkResult
+```
+
+### Capturas
+
+![alt text](<Captura de pantalla 2025-07-29 000453.png>)
+
+![alt text](<Captura de pantalla 2025-07-29 000307.png>)
+
+```
+// Implementación BFS en MazeSolver.java
+
+private static MazeResult bfs(Maze maze) {
+    List<Nodo> nodos = maze.getNodos();
+    int filas = maze.getFilas();
+    int columnas = maze.getColumnas();
+
+    // 1. Encontrar nodos de inicio y fin
+
+    Nodo inicio = nodos.stream().filter(Nodo::isEsInicio).findFirst().orElse(null);
+    Nodo fin = nodos.stream().filter(Nodo::isEsFin).findFirst().orElse(null);
+
+    // 2. Inicializar estructuras de datos
+
+    boolean[][] visitado = new boolean[filas][columnas];
+    Map<Nodo, Nodo> padres = new HashMap<>();
+    Queue<Nodo> cola = new LinkedList<>();
+    List<Map<String, Object>> resultado = new ArrayList<>();
+
+    // 3. Iniciar BFS desde el nodo inicial
+
+    cola.add(inicio);
+    visitado[inicio.getX()][inicio.getY()] = true;
+    
+    int[][] direcciones = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}}; // Movimientos posibles
+
+    while (!cola.isEmpty()) {
+        Nodo actual = cola.poll();
+        resultado.add(Map.of("x", actual.getX(), "y", actual.getY(), "tipo", "visitado"));
+
+        if (actual.equals(fin)) break; // Solución encontrada
+
+        // 4. Explorar vecinos
+
+        for (int[] dir : direcciones) {
+            int nx = actual.getX() + dir[0];
+            int ny = actual.getY() + dir[1];
+            
+            if (esValido(nodos, nx, ny, filas, columnas, visitado)) {
+                Nodo vecino = encontrarNodo(nodos, nx, ny);
+                visitado[nx][ny] = true;
+                padres.put(vecino, actual);
+                cola.add(vecino);
+            }
+        }
+    }
+
+    // 5. Reconstruir camino desde el final
+
+    List<Map<String, Object>> camino = new ArrayList<>();
+    Nodo actual = fin;
+    while (padres.containsKey(actual)) {
+        camino.add(Map.of("x", actual.getX(), "y", actual.getY(), "tipo", "camino"));
+        actual = padres.get(actual);
+    }
+    
+    // 6. Preparar resultado final
+
+    camino.add(Map.of("x", inicio.getX(), "y", inicio.getY(), "tipo", "camino"));
+    Collections.reverse(camino);
+    resultado.addAll(camino);
+
+    return new MazeResult(resultado, 0, "bfs");
+}
+```
+
+### Explicación:
+
+- Identifica nodos iniciales y finales
+
+- Inicializa estructuras para el algoritmo
+
+- Comienza la exploración desde el nodo inicial
+
+- Explora sistemáticamente todos los vecinos
+
+- Reconstruye el camino desde el final
+
+- Retorna el resultado con el camino solución
+
+##  Conclusiones
+
+###  Estudiante 1 
+
+Durante las pruebas con la interfaz desarrollada en Flutter, noté que el algoritmo BFS fue el más eficiente al momento de encontrar el camino más corto, especialmente en laberintos complejos. La opción de visualizar paso a paso permitió observar cómo BFS expande sus nodos de forma sistemática, lo cual fue muy útil para fines educativos. Sin embargo, en laberintos grandes noté un leve retraso en la visualización, probablemente por la cantidad de nodos visitados que debe procesar. Aun así, para aplicaciones visuales donde se desea claridad en el recorrido, BFS fue el más consistente.
+
+###  Estudiante 2 
+
+Desde el backend, trabajar con distintos algoritmos me permitió entender cómo cada uno responde a estructuras diferentes de laberintos. El enfoque Backtracking fue especialmente útil en escenarios donde existían múltiples caminos erróneos, ya que permite retroceder y corregir. Sin embargo, en laberintos más grandes noté que la profundidad de la recursión puede ser un problema si no se maneja bien. Por otro lado, DFS fue bastante rápido, pero no siempre encuentra el camino más corto. La estructura modular del backend facilitó la integración de estos algoritmos y su uso desde Flutter.
