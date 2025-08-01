@@ -18,19 +18,19 @@ public class MazeSolver {
         return dfs(maze);
     }
 
-    // === Recursivo 2 direcciones ===
+    // === Recursivo 2 direcciones (sin backtracking) ===
     public static MazeResult resolverRecursivo2Direcciones(Maze maze) {
         return recursivoDirecciones(maze, new int[][]{{0, 1}, {1, 0}});
     }
 
-    // === Recursivo 4 direcciones ===
+    // === Recursivo 4 direcciones (sin backtracking) ===
     public static MazeResult resolverRecursivo4Direcciones(Maze maze) {
         return recursivoDirecciones(maze, new int[][]{{0, 1}, {1, 0}, {0, -1}, {-1, 0}});
     }
 
     // === Recursivo 4 direcciones con backtracking ===
     public static MazeResult resolverRecursivo4ConBacktracking(Maze maze) {
-        return recursivoBacktracking(maze);
+        return recursivoDireccionesConBacktracking(maze, new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}});
     }
 
     // === Implementación BFS ===
@@ -100,7 +100,6 @@ public class MazeSolver {
         Map<Nodo, Nodo> padres = new HashMap<>();
         dfsRec(inicio, fin, nodos, visitado, resultado, padres, filas, columnas);
 
-        // reconstruir camino
         Nodo actual = fin;
         while (padres.containsKey(actual)) {
             camino.add(Map.of("x", actual.getX(), "y", actual.getY(), "tipo", "camino"));
@@ -138,7 +137,7 @@ public class MazeSolver {
         return false;
     }
 
-    // === Método Recursivo (2 o 4 direcciones) ===
+    // === Método Recursivo sin Backtracking ===
     private static MazeResult recursivoDirecciones(Maze maze, int[][] direcciones) {
         List<Nodo> nodos = maze.getNodos();
         int filas = maze.getFilas();
@@ -152,7 +151,6 @@ public class MazeSolver {
 
         resolverRec(inicio, fin, nodos, visitado, direcciones, resultado, path);
 
-        // Convertir path a resultado final
         for (Nodo n : path) {
             resultado.add(Map.of("x", n.getX(), "y", n.getY(), "tipo", "camino"));
         }
@@ -160,6 +158,7 @@ public class MazeSolver {
         return new MazeResult(resultado, 0, maze.getAlgoritmo());
     }
 
+    // === Recursivo SIN backtracking ===
     private static boolean resolverRec(Nodo actual, Nodo fin, List<Nodo> nodos, boolean[][] visitado,
                                        int[][] direcciones, List<Map<String, Object>> resultado, List<Nodo> path) {
         if (actual == null || actual.isEsObstaculo()) return false;
@@ -181,13 +180,55 @@ public class MazeSolver {
             if (resolverRec(vecino, fin, nodos, visitado, direcciones, resultado, path)) return true;
         }
 
-        path.remove(path.size() - 1);
+        // No hay backtracking: no se remueve el nodo del path
         return false;
     }
 
-    // === Método Recursivo con Backtracking ===
-    private static MazeResult recursivoBacktracking(Maze maze) {
-        return recursivoDirecciones(maze, new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}});
+    // === Método Recursivo CON Backtracking ===
+    private static MazeResult recursivoDireccionesConBacktracking(Maze maze, int[][] direcciones) {
+        List<Nodo> nodos = maze.getNodos();
+        int filas = maze.getFilas();
+        int columnas = maze.getColumnas();
+        Nodo inicio = nodos.stream().filter(Nodo::isEsInicio).findFirst().orElse(null);
+        Nodo fin = nodos.stream().filter(Nodo::isEsFin).findFirst().orElse(null);
+
+        boolean[][] visitado = new boolean[filas][columnas];
+        List<Map<String, Object>> resultado = new ArrayList<>();
+        List<Nodo> path = new ArrayList<>();
+
+        resolverRecConBacktracking(inicio, fin, nodos, visitado, direcciones, resultado, path);
+
+        for (Nodo n : path) {
+            resultado.add(Map.of("x", n.getX(), "y", n.getY(), "tipo", "camino"));
+        }
+
+        return new MazeResult(resultado, 0, maze.getAlgoritmo());
+    }
+
+    private static boolean resolverRecConBacktracking(Nodo actual, Nodo fin, List<Nodo> nodos, boolean[][] visitado,
+                                                      int[][] direcciones, List<Map<String, Object>> resultado, List<Nodo> path) {
+        if (actual == null || actual.isEsObstaculo()) return false;
+        int x = actual.getX(), y = actual.getY();
+        if (visitado[x][y]) return false;
+
+        visitado[x][y] = true;
+        resultado.add(Map.of("x", x, "y", y, "tipo", "visitado"));
+        path.add(actual);
+
+        if (actual.equals(fin)) return true;
+
+        for (int[] dir : direcciones) {
+            int nx = x + dir[0];
+            int ny = y + dir[1];
+            if (!esValido(nodos, nx, ny, visitado.length, visitado[0].length, visitado)) continue;
+
+            Nodo vecino = encontrarNodo(nodos, nx, ny);
+            if (resolverRecConBacktracking(vecino, fin, nodos, visitado, direcciones, resultado, path)) return true;
+        }
+
+        // Aquí sí se hace backtracking
+        path.remove(path.size() - 1);
+        return false;
     }
 
     // === Utilitarios ===

@@ -35,7 +35,7 @@ class _CsvPageState extends State<CsvPage> {
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
                             child: DataTable(
-                              headingRowColor: MaterialStateColor.resolveWith(
+                              headingRowColor: WidgetStateColor.resolveWith(
                                   (states) => Colors.blueGrey.shade100),
                               columns: const [
                                 DataColumn(label: Text('Fecha')),
@@ -49,7 +49,7 @@ class _CsvPageState extends State<CsvPage> {
                               rows: List.generate(controller.resumenList.length, (index) {
                                 final resumen = controller.resumenList[index];
                                 return DataRow(
-                                  color: MaterialStateColor.resolveWith((states) =>
+                                  color: WidgetStateColor.resolveWith((states) =>
                                     index % 2 == 0 ? Colors.grey.shade50 : Colors.white),
                                   cells: [
                                     DataCell(Text(resumen.fecha)),

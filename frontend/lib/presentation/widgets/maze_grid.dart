@@ -6,10 +6,10 @@ class MazeGrid extends StatelessWidget {
   final void Function(int x, int y) onTapNodo;
 
   const MazeGrid({
-    Key? key,
+    super.key,
     required this.maze,
     required this.onTapNodo,
-  }) : super(key: key);
+  });
 
   Color _getColor(Nodo nodo) {
   if (nodo.esInicio) return Colors.green;
