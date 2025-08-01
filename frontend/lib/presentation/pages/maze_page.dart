@@ -1,4 +1,3 @@
-// 🧭 MazePage con botones de paso a paso
 import 'package:flutter/material.dart';
 import '../controllers/maze_controller.dart';
 import '../widgets/maze_grid.dart';
@@ -16,6 +15,7 @@ class _MazePageState extends State<MazePage> {
   final TextEditingController _colsController = TextEditingController();
   String selectedAlgorithm = 'bfs';
   String interactionMode = 'obstaculo';
+  bool pasoAPasoActivado = false;
 
   @override
   void initState() {
@@ -67,9 +67,9 @@ class _MazePageState extends State<MazePage> {
 
     try {
       print("Enviando laberinto al backend...");
+      _controller.setModoPasoActivo(pasoAPasoActivado);
       await _controller.resolver(selectedAlgorithm);
       print("Datos recibidos del backend y aplicados.");
-      _controller.inicializarPasoAPaso();
     } catch (e, stack) {
       print("Error en _resolverMaze: $e");
       print(stack);
@@ -95,6 +95,7 @@ class _MazePageState extends State<MazePage> {
             Wrap(
               spacing: 12,
               runSpacing: 12,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 SizedBox(
                   width: 100,
@@ -127,6 +128,20 @@ class _MazePageState extends State<MazePage> {
                     DropdownMenuItem(value: 'iniciofin', child: Text("Inicio/Fin")),
                   ],
                 ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text("Paso a paso"),
+                    Switch(
+                      value: pasoAPasoActivado,
+                      onChanged: (value) {
+                        setState(() {
+                          pasoAPasoActivado = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ],
             ),
             const SizedBox(height: 16),
@@ -147,16 +162,20 @@ class _MazePageState extends State<MazePage> {
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
                 ),
                 ElevatedButton.icon(
-                  onPressed: _controller.avanzarPaso,
+                  onPressed: _controller.modoPasoActivo ? _controller.avanzarPaso : null,
                   icon: const Icon(Icons.skip_next),
                   label: const Text('Avanzar'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _controller.modoPasoActivo ? Colors.blue : Colors.grey,
+                  ),
                 ),
                 ElevatedButton.icon(
-                  onPressed: _controller.retrocederPaso,
+                  onPressed: _controller.modoPasoActivo ? _controller.retrocederPaso : null,
                   icon: const Icon(Icons.skip_previous),
                   label: const Text('Retroceder'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _controller.modoPasoActivo ? Colors.blue : Colors.grey,
+                  ),
                 ),
               ],
             ),
@@ -195,4 +214,4 @@ class _MazePageState extends State<MazePage> {
       ),
     );
   }
-} // 🧭 Fin de MazePage
+}

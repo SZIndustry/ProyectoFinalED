@@ -14,6 +14,8 @@ class MazeController extends ChangeNotifier {
   int _pasoActual = 0;
   List<Map<String, dynamic>> _pasos = [];
 
+  bool _modoPasoActivo = false; // 🔁 Controla si usar paso a paso
+
   final List<String> availableAlgorithms = [
     'recursivo2',
     'recursivo4',
@@ -22,10 +24,29 @@ class MazeController extends ChangeNotifier {
     'dfs',
   ];
 
+  bool get modoPasoActivo => _modoPasoActivo;
+
+  void setModoPasoActivo(bool activar) {
+    _modoPasoActivo = activar;
+
+    if (_lastResult == null) return;
+
+    if (_modoPasoActivo) {
+      inicializarPasoAPaso(); // Paso a paso inicia en paso 0
+    } else {
+      aplicarResultadoCompleto(); // Pintar todo de una
+    }
+
+    notifyListeners();
+  }
+
   void generarLaberinto(int filas, int columnas) {
     maze = generarMaze(filas, columnas);
     maze[0][0].esInicio = true;
     maze[filas - 1][columnas - 1].esFin = true;
+    _modoPasoActivo = false;
+    _pasos.clear();
+    _lastResult = null;
     notifyListeners();
   }
 
@@ -73,7 +94,12 @@ class MazeController extends ChangeNotifier {
         _lastResult = result;
         _pasos = result.resultado;
         _pasoActual = 0;
-        aplicarResultadoCompleto(); // mostrar todo inicialmente
+
+        if (_modoPasoActivo) {
+          inicializarPasoAPaso();
+        } else {
+          aplicarResultadoCompleto();
+        }
       }
     } catch (e, stack) {
       _errorMessage = e.toString();
@@ -82,6 +108,7 @@ class MazeController extends ChangeNotifier {
     }
 
     _isSolving = false;
+    notifyListeners();
   }
 
   void inicializarPasoAPaso() {
@@ -93,7 +120,7 @@ class MazeController extends ChangeNotifier {
           nodo.resetTipo();
         }
       }
-      notifyListeners();
+      aplicarResultadoPasoActual();
     }
   }
 
@@ -121,17 +148,15 @@ class MazeController extends ChangeNotifier {
   }
 
   void avanzarPaso() {
-    if (_pasoActual < _pasos.length - 1) {
-      _pasoActual++;
-      aplicarResultadoPasoActual();
-    }
+    if (!_modoPasoActivo || _pasoActual >= _pasos.length - 1) return;
+    _pasoActual++;
+    aplicarResultadoPasoActual();
   }
 
   void retrocederPaso() {
-    if (_pasoActual > 0) {
-      _pasoActual--;
-      aplicarResultadoPasoActual();
-    }
+    if (!_modoPasoActivo || _pasoActual <= 0) return;
+    _pasoActual--;
+    aplicarResultadoPasoActual();
   }
 
   void aplicarResultadoCompleto() {
@@ -155,6 +180,7 @@ class MazeController extends ChangeNotifier {
         }
       }
     }
+
     notifyListeners();
   }
 }
